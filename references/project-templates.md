@@ -4,6 +4,324 @@
 
 ---
 
+## 零、2026 实战项目模板（企业级）
+
+> 以下模板基于 2025-2026 年 NLP/LLM 方向真实岗位 JD 提炼，面向面试展示而非教学。每个模板均包含可量化的简历 bullet point、最小可运行骨架和核心实现任务。
+
+---
+
+### Template 1: AI 面试助手 (RAG + Agent) ⭐ 最高优先级
+
+- **项目名称:** LangChain/LangGraph + AI 智能面试助手
+- **难度:** 进阶
+- **技术栈:** LangChain / LangGraph + ChromaDB / Milvus + FastAPI + MCP + Docker
+- **简历描述示例:**
+  - 构建基于 RAG + Agent 的智能面试助手，支持多轮追问、模拟评分和面经知识库检索，服务化部署后 QPS 达 30+
+  - 实现文档解析（PDF/Word）→ 智能切片（Semantic Chunking）→ 混合检索（BM25 + 向量）→ Rerank 完整管道，检索 Recall@5 达 88%
+  - 基于 LangGraph 实现 Agent 多轮对话状态机，集成 MCP 协议扩展工具调用能力，对话相关性评分 > 90%
+- **最小可运行骨架:**
+  ```
+  interview-assistant/
+  ├── src/
+  │   ├── parser/               # 文档解析模块
+  │   │   ├── pdf_parser.py     # PDF 解析（PyMuPDF / pdfplumber）
+  │   │   └── docx_parser.py    # Word 解析
+  │   ├── chunker/
+  │   │   └── semantic_chunk.py # 语义切片（按段落 + 语义边界）
+  │   ├── retriever/
+  │   │   ├── bm25_retriever.py # BM25 关键词检索
+  │   │   ├── vector_retriever.py # 向量检索（ChromaDB / Milvus）
+  │   │   ├── hybrid.py         # 混合检索与融合（RRF）
+  │   │   └── reranker.py       # Rerank（Cross-Encoder / BGE-Reranker）
+  │   ├── agent/
+  │   │   ├── graph.py          # LangGraph 对话状态机
+  │   │   ├── tools.py          # MCP 工具定义与注册
+  │   │   └── prompts.py        # 提示词模板
+  │   ├── scorer/
+  │   │   └── evaluator.py      # 回答评分与反馈生成
+  │   ├── api.py                # FastAPI 服务入口
+  │   └── config.py             # 配置管理
+  ├── data/
+  │   ├── raw/                  # 原始面经文件
+  │   └── processed/            # 切片后的向量库
+  ├── evaluations/              # Ragas 评估脚本与结果
+  ├── docker-compose.yml
+  └── requirements.txt
+  ```
+- **核心实现任务:**
+  1. 搭建 FastAPI 项目骨架，定义文档上传与问答接口契约（OpenAPI）
+  2. 实现文档解析管道：PDF（PyMuPDF）+ Word（python-docx）→ 统一 Text 结构
+  3. 实现语义切片：基于段落 + 滑动窗口，支持自定义 chunk_size 与 overlap
+  4. 实现向量检索：选择 Embedding 模型（BGE-large-zh）→ 写入 ChromaDB → 相似度查询
+  5. 实现 BM25 检索：基于 jieba 分词构建 BM25 索引，支持关键词查询
+  6. 实现混合检索：RRF（Reciprocal Rank Fusion）融合 BM25 + 向量结果 → Rerank 精排
+  7. 实现 Agent 对话：LangGraph 定义状态节点（检索→生成→追问判断→评分），集成 MCP 工具
+  8. 实现 Ragas 评估管线：自动计算 Context Relevance / Answer Relevance / Faithfulness
+- **面试加分点:**
+  - 混合检索 + Rerank 的完整检索管道（而非简单的向量相似度）
+  - Ragas 框架进行 RAG 质量评估（有量化指标）
+  - MCP 协议标准化工具调用（2025 前沿技术）
+  - 线上 Demo（HuggingFace Space / 云服务器部署）
+- **参考资料:**
+  - github.com/alvinxx1123/sspOffer-interview-assistant
+  - LangGraph 官方文档: langchain-ai.github.io/langgraph/
+  - Ragas 评估框架: docs.ragas.io
+
+---
+
+### Template 2: Multi-Agent 协作系统
+
+- **项目名称:** LangGraph + MCP + Multi-Agent 协作框架
+- **难度:** 进阶+
+- **技术栈:** LangGraph + MCP + Function Calling + FastAPI + Redis + Docker
+- **简历描述示例:**
+  - 基于 LangGraph 实现多 Agent 协作框架，支持搜索、分析、写作、审核 4 类 Agent 通过 DAG 编排协同完成复杂任务
+  - 集成 MCP 协议实现标准化工具调用，Agent 可按需动态发现和调用外部工具，工具调用成功率达 92%
+  - 设计 Agent 间通信协议（消息队列 + 共享上下文），支持任务分解、并行执行与结果聚合，端到端任务完成率 87%
+- **最小可运行骨架:**
+  ```
+  multi-agent-framework/
+  ├── src/
+  │   ├── agents/
+  │   │   ├── base.py          # Agent 基类（状态、消息、工具）
+  │   │   ├── search_agent.py  # 搜索 Agent（信息检索）
+  │   │   ├── analysis_agent.py # 分析 Agent（数据/文本分析）
+  │   │   ├── writer_agent.py  # 写作 Agent（内容生成）
+  │   │   └── reviewer_agent.py # 审核 Agent（质量检查）
+  │   ├── orchestrator/
+  │   │   ├── graph.py         # LangGraph DAG 编排
+  │   │   ├── planner.py       # 任务分解与分配
+  │   │   └── aggregator.py   # 结果聚合与冲突解决
+  │   ├── mcp/
+  │   │   ├── tool_registry.py # MCP 工具注册中心
+  │   │   ├── clients.py       # MCP 客户端封装
+  │   │   └── tools/           # 自定义工具实现
+  │   │       ├── web_search.py
+  │   │       ├── code_executor.py
+  │   │       └── data_fetcher.py
+  │   ├── communication/
+  │   │   └── message_bus.py   # Agent 间消息总线
+  │   ├── api.py               # FastAPI 入口
+  │   └── config.py
+  ├── docker-compose.yml
+  └── requirements.txt
+  ```
+- **核心实现任务:**
+  1. 定义 Agent 基类：规范状态字段（messages、context、next_agent）、工具声明、执行接口
+  2. 实现 Search Agent：封装 Tavily / SerpAPI 搜索，支持结构化结果提取
+  3. 实现 Analysis Agent：接收搜索 Agent 结果，进行关键信息提取与对比分析
+  4. 实现 Writer Agent：基于分析结果生成结构化内容（报告 / 方案 / 摘要）
+  5. 实现 Reviewer Agent：对内容进行质量评分、事实核查与修改建议
+  6. 实现 LangGraph 编排：DAG 定义（Search → Analysis → Writer → Reviewer），含条件分支与错误恢复
+  7. 实现 MCP 工具注册与动态发现：每个 Agent 启动时注册自身工具，运行时动态调用
+  8. 实现 Agent 间通信：Redis Pub/Sub 消息总线 + 共享 Context 对象
+- **面试加分点:**
+  - MCP 协议（Anthropic 2025 标准），展示对行业前沿的关注
+  - Agent 间通信设计（非简单的顺序调用，有消息总线）
+  - 错误恢复与任务重分配机制
+  - 可扩展架构（新增 Agent 类型无需改动编排引擎）
+- **参考资料:**
+  - LangGraph Multi-Agent 示例: github.com/langchain-ai/langgraph
+  - MCP 协议规范: modelcontextprotocol.io
+  - CrewAI / AutoGen 作为对比参考
+
+---
+
+### Template 3: 企业级 RAG 知识库
+
+- **项目名称:** FastAPI + PostgreSQL + pgvector + 企业级 RAG 知识库平台
+- **难度:** 进阶
+- **技术栈:** FastAPI + PostgreSQL + pgvector + Redis + MinIO + Docker Compose
+- **简历描述示例:**
+  - 从零构建企业级 RAG 知识库平台，支持多用户、多知识库、权限隔离与文档生命周期管理
+  - 实现多路检索（向量 + 全文 + 知识图谱）→ 缓存加速（Redis）→ 流式输出（SSE）→ 用户反馈闭环完整链路
+  - 生产级架构设计：Prometheus 可观测性 + Docker Compose 一键部署，QPS > 50，P99 延迟 < 500ms，支持 10GB+ 文档
+- **最小可运行骨架:**
+  ```
+  enterprise-rag/
+  ├── src/
+  │   ├── api/
+  │   │   ├── v1/
+  │   │   │   ├── auth.py       # 认证接口
+  │   │   │   ├── kb.py         # 知识库 CRUD
+  │   │   │   ├── document.py   # 文档管理
+  │   │   │   ├── search.py     # 检索接口
+  │   │   │   └── feedback.py   # 用户反馈
+  │   │   └── deps.py           # 依赖注入（DB Session、当前用户）
+  │   ├── core/
+  │   │   ├── config.py         # 全局配置
+  │   │   ├── security.py       # JWT + RBAC 权限
+  │   │   └── database.py       # PostgreSQL + pgvector 连接
+  │   ├── services/
+  │   │   ├── chunk_service.py  # 切片服务
+  │   │   ├── embed_service.py  # 向量化服务
+  │   │   ├── search_service.py # 检索编排
+  │   │   └── cache_service.py  # Redis 缓存
+  │   ├── models/               # SQLAlchemy 模型
+  │   │   ├── user.py
+  │   │   ├── knowledge_base.py
+  │   │   ├── document.py
+  │   │   └── chunk.py
+  │   ├── stream/
+  │   │   └── sse.py            # SSE 流式输出
+  │   └── observability/
+  │       ├── metrics.py        # Prometheus 指标
+  │       └── logging.py        # 结构化日志
+  ├── migrations/               # Alembic 迁移
+  ├── nginx/
+  │   └── nginx.conf
+  ├── docker-compose.yml
+  ├── Dockerfile
+  └── requirements.txt
+  ```
+- **核心实现任务:**
+  1. 搭建 FastAPI 项目结构，配置 PostgreSQL + pgvector + Redis + MinIO（docker-compose）
+  2. 设计数据库模型：User、KnowledgeBase、Document、Chunk、Feedback（含 ER 图）
+  3. 实现用户认证与 RBAC：注册/登录、JWT 签发、知识库级别权限隔离
+  4. 实现文档管理管道：上传 → 格式检测 → 切片（Semantic + Fixed）→ 向量化 → 入 pgvector
+  5. 实现多路检索：pgvector 向量检索 + PostgreSQL full-text search + Redis 缓存热点查询
+  6. 实现流式输出：SSE 协议逐 token 返回生成结果，支持客户端主动断开
+  7. 实现反馈闭环：用户点赞/点踩 → 记录 Bad Case → 触发切片/检索策略优化
+  8. 添加可观测性：Prometheus 指标（QPS、延迟分桶、缓存命中率）+ Grafana Dashboard
+- **面试加分点:**
+  - 生产级架构（非 Demo），考虑了多用户、权限、缓存、可观测性
+  - pgvector 而非 ChromaDB（更适合生产环境，与 PostgreSQL 深度集成）
+  - SSE 流式输出（用户体验好，实际生产常用）
+  - Docker Compose 一键部署（面试官可以本地跑起来）
+  - 用户反馈闭环（体现了迭代优化思维，而非一次性项目）
+- **参考资料:**
+  - pgvector: github.com/pgvector/pgvector
+  - Dify 开源 RAG 平台: github.com/langgenius/dify
+  - RAGAS 评估: docs.ragas.io
+
+---
+
+### Template 4: 大模型微调平台
+
+- **项目名称:** PyTorch + DeepSpeed + LoRA/QLoRA + 大模型微调训练平台
+- **难度:** 高级
+- **技术栈:** PyTorch + DeepSpeed + LoRA / QLoRA (PEFT) + Wandb + Gradio + vLLM
+- **简历描述示例:**
+  - 搭建大模型微调平台，支持 LoRA/QLoRA 微调、数据集版本管理、自动评估与一键部署，覆盖 LLaMA/Qwen 等主流基座
+  - 基于 DeepSpeed ZeRO-3 实现分布式训练，支持 10B+ 参数模型在 4×A100 上高效微调，微调效率较全参提升 40%
+  - 设计自动化评估管道（BLEU / ROUGE / 人工评估代理），模型导出后通过 vLLM 部署为推理服务，P99 延迟 < 200ms
+- **最小可运行骨架:**
+  ```
+  llm-finetune-platform/
+  ├── src/
+  │   ├── data/
+  │   │   ├── preprocessor.py   # 数据预处理（格式标准化）
+  │   │   ├── dataset.py        # PyTorch Dataset 封装
+  │   │   └── version_manager.py # 数据集版本管理
+  │   ├── trainer/
+  │   │   ├── train.py          # 训练主脚本
+  │   │   ├── lora_config.py    # LoRA 配置（rank、alpha、target_modules）
+  │   │   ├── ds_config.json    # DeepSpeed ZeRO 配置
+  │   │   └── callbacks.py      # Wandb 回调 + 早停
+  │   ├── evaluator/
+  │   │   ├── metrics.py        # BLEU / ROUGE / Perplexity
+  │   │   ├── auto_eval.py      # 自动化评估管道
+  │   │   └── compare.py        # 基座 vs 微调模型对比
+  │   ├── deploy/
+  │   │   ├── export.py         # 模型合并与导出
+  │   │   ├── vllm_serve.py     # vLLM 部署脚本
+  │   │   └── benchmark.py      # 推理性能压测
+  │   ├── ui/
+  │   │   └── app.py            # Gradio Web 界面
+  │   └── config.py
+  ├── configs/                   # 各模型配置文件
+  │   ├── qwen2_7b_lora.yaml
+  │   └── llama3_8b_qlora.yaml
+  ├── docker-compose.yml
+  └── requirements.txt
+  ```
+- **核心实现任务:**
+  1. 搭建 PyTorch + Transformers + PEFT 开发环境，配置 DeepSpeed ZeRO-3
+  2. 实现数据预处理管道：支持 Alpaca/ShareGPT 格式 → 统一 Chat Template → 数据集版本快照
+  3. 实现 LoRA 训练脚本：加载基座模型 → 注入 LoRA Adapter → DeepSpeed 分布式训练 → Wandb 日志
+  4. 实现 QLoRA 训练支持：4-bit 量化加载（bitsandbytes）→ 与 LoRA 共用训练引擎
+  5. 实现自动化评估管道：训练结束后自动运行 BLEU / ROUGE / Perplexity 评估，生成对比报告
+  6. 实现模型合并与导出：LoRA Adapter 合并回基座权重 → 导出为 HuggingFace 格式
+  7. 实现 vLLM 推理部署：加载合并后模型 → 启动 OpenAI 兼容 API → 压测吞吐与延迟
+  8. 实现 Gradio Web 界面：数据集上传 → 参数配置 → 训练监控 → 结果评估 → 模型下载
+- **面试加分点:**
+  - DeepSpeed ZeRO 分布式训练（展示大规模训练经验）
+  - QLoRA 量化微调（降低硬件门槛，实际落地常用）
+  - 自动化评估管道（非手动跑脚本，体现工程化思维）
+  - vLLM 高性能推理部署（PagedAttention 技术）
+  - 数据集版本管理（体现数据驱动迭代意识）
+- **参考资料:**
+  - PEFT (LoRA/QLoRA): github.com/huggingface/peft
+  - DeepSpeed: github.com/microsoft/DeepSpeed
+  - vLLM: github.com/vllm-project/vllm
+  - LLaMA-Factory (参考架构): github.com/hiyouga/LLaMA-Factory
+
+---
+
+### Template 5: LLM 应用观测平台
+
+- **项目名称:** FastAPI + ClickHouse + Grafana + LLM 可观测性平台
+- **难度:** 进阶
+- **技术栈:** FastAPI + ClickHouse + Grafana + OpenTelemetry + Redis + Docker
+- **简历描述示例:**
+  - 构建 LLM 应用可观测平台，实现调用链追踪、Token 消耗统计、成本核算与质量评估，支持 100+ 应用接入
+  - 基于 OpenTelemetry 标准化埋点方案，无侵入接入 LangChain / OpenAI SDK，日处理 1 亿+ 条日志
+  - 设计异常检测与告警规则（成本突增、延迟恶化、质量下降），通过 Grafana Alerting 推送飞书通知
+- **最小可运行骨架:**
+  ```
+  llm-observability/
+  ├── src/
+  │   ├── sdk/
+  │   │   ├── tracer.py        # OpenTelemetry Tracer 封装
+  │   │   └── decorators.py    # @trace_llm_call 装饰器
+  │   ├── collector/
+  │   │   ├── api.py           # 日志接收 API（OTLP）
+  │   │   └── processor.py    # 日志预处理（Token 计数、延迟分桶）
+  │   ├── storage/
+  │   │   ├── clickhouse.py   # ClickHouse 写入与查询
+  │   │   └── schema.sql      # ClickHouse 表结构
+  │   ├── analytics/
+  │   │   ├── cost.py          # 成本计算引擎（按模型单价）
+  │   │   ├── latency.py      # 延迟分桶统计
+  │   │   └── quality.py      # LLM-as-Judge 质量评估
+  │   ├── alerts/
+  │   │   ├── rules.py        # 告警规则引擎
+  │   │   └── notifier.py     # 飞书 Webhook 通知
+  │   ├── api/
+  │   │   └── query_api.py    # 查询 API（应用/时间/模型维度）
+  │   └── config.py
+  ├── grafana/
+  │   ├── dashboards/
+  │   │   ├── overview.json   # 全局概览 Dashboard
+  │   │   ├── cost.json       # 成本分析 Dashboard
+  │   │   └── quality.json    # 质量监控 Dashboard
+  │   └── provisioning/       # Grafana 数据源自动配置
+  ├── docker-compose.yml
+  └── requirements.txt
+  ```
+- **核心实现任务:**
+  1. 搭建 ClickHouse + Grafana + Redis 基础设施（docker-compose），设计日志表结构（按日期分区 + 物化视图）
+  2. 实现 OpenTelemetry SDK 封装：装饰器 `@trace_llm_call`，自动捕获 model / prompt / tokens / latency / response
+  3. 实现日志采集器：接收 OTLP 协议数据 → 预处理（Token 计数补偿、延迟分桶、错误分类）
+  4. 实现 ClickHouse 写入管道：批量写入优化（Buffer Engine）→ 物化视图预聚合（分钟/小时/天粒度）
+  5. 实现成本核算引擎：维护模型单价表（GPT-4o、Claude 3.5、DeepSeek-V4 等）× Token 用量 → 实时成本
+  6. 实现查询 API：按应用、时间区间、模型、用户等维度提供聚合查询接口
+  7. 搭建 Grafana Dashboard：调用量趋势、Token 消耗排行、成本趋势、延迟 P50/P99、错误率
+  8. 实现告警规则引擎：成本突增 > 50%、P99 延迟 > 2s、错误率 > 5% → 飞书 Webhook 通知
+- **面试加分点:**
+  - OpenTelemetry 行业标准，无侵入接入（非自定义日志格式）
+  - ClickHouse 列存数据库选型，展示大数据量处理意识
+  - 成本可视化与优化建议（实际生产中 LLM 成本是核心痛点）
+  - LLM-as-Judge 质量评估（自带评估体系，非仅关注性能指标）
+  - Grafana 预配置 Dashboard 一键导入
+- **参考资料:**
+  - OpenTelemetry Python: opentelemetry.io/docs/languages/python/
+  - ClickHouse: clickhouse.com
+  - Langfuse (参考产品): github.com/langfuse/langfuse
+  - Helicone (参考产品): github.com/Helicone/helicone
+
+---
+
 ## 一、模板字段说明
 
 每个模板统一使用以下结构：
